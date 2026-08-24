@@ -47,15 +47,18 @@ jobs:
 
       - name: Generate default target config (.config)
         run: |
-          # Fetch official seed config to include required kernel/driver definitions
-          curl -sSL https://raw.githubusercontent.com/padavanonly/immortalwrt-mt798x-6.6/openwrt-24.10-6.6/defconfig -o .config
-          
-          # Force target hardware to JDCloud RE-CP-03
-          echo "CONFIG_TARGET_mediatek=y" >> .config
-          echo "CONFIG_TARGET_mediatek_mt798x=y" >> .config
+          # Copy the MT7981 platform base configuration provided by padavanonly
+          if [ -f "defconfig/mt7981-ax3000.config" ]; then
+            cp -f defconfig/mt7981-ax3000.config .config
+          else
+            echo "CONFIG_TARGET_mediatek=y" > .config
+            echo "CONFIG_TARGET_mediatek_mt798x=y" >> .config
+          fi
+
+          # Specify the exact JDCloud RE-CP-03 target profile
           echo "CONFIG_TARGET_mediatek_mt798x_DEVICE_jdcloud_re-cp-03=y" >> .config
-          
-          # Expand full configuration
+
+          # Expand to full build configuration
           make defconfig
 
       - name: Setup SSH interactive config terminal (Optional)
