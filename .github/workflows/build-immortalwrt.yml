@@ -55,12 +55,18 @@ jobs:
             echo "CONFIG_TARGET_mediatek_mt798x=y" >> .config
           fi
 
-          # Specify the exact JDCloud RE-CP-03 target profile
+          # 2. Disable ALL_PROFILES and set JDCloud RE-CP-03
+          sed -i 's/CONFIG_TARGET_ALL_PROFILES=y/# CONFIG_TARGET_ALL_PROFILES is not set/' .config
+          echo "CONFIG_TARGET_MULTI_PROFILE=y" >> .config
+          echo "CONFIG_TARGET_DEVICE_mediatek_mt798x_DEVICE_jdcloud_re-cp-03=y" >> .config
           echo "CONFIG_TARGET_mediatek_mt798x_DEVICE_jdcloud_re-cp-03=y" >> .config
 
-          # Expand to full build configuration
+          # 3. Process config and re-enforce the RE-CP-03 target
           make defconfig
-
+          echo "CONFIG_TARGET_DEVICE_mediatek_mt798x_DEVICE_jdcloud_re-cp-03=y" >> .config
+          echo "CONFIG_TARGET_mediatek_mt798x_DEVICE_jdcloud_re-cp-03=y" >> .config
+          make defconfig
+          
       - name: Setup SSH interactive config terminal (Optional)
         if: ${{ github.event.inputs.ssh == 'true' }}
         uses: mxschmitt/action-tmate@v3
