@@ -47,21 +47,21 @@ jobs:
 
       - name: Generate default target config (.config)
         run: |
-          # Copy the MT7981 platform base configuration provided by padavanonly
-          if [ -f "defconfig/mt7981-ax3000.config" ]; then
-            cp -f defconfig/mt7981-ax3000.config .config
+          # 1. Use mt7986-ax6000 base config (MT7986 platform for JDCloud RE-CP-03)
+          if [ -f "defconfig/mt7986-ax6000.config" ]; then
+            cp -f defconfig/mt7986-ax6000.config .config
           else
             echo "CONFIG_TARGET_mediatek=y" > .config
             echo "CONFIG_TARGET_mediatek_mt798x=y" >> .config
           fi
 
-          # 2. Disable ALL_PROFILES and set JDCloud RE-CP-03
+          # 2. Disable building all profiles and isolate JDCloud RE-CP-03
           sed -i 's/CONFIG_TARGET_ALL_PROFILES=y/# CONFIG_TARGET_ALL_PROFILES is not set/' .config
           echo "CONFIG_TARGET_MULTI_PROFILE=y" >> .config
           echo "CONFIG_TARGET_DEVICE_mediatek_mt798x_DEVICE_jdcloud_re-cp-03=y" >> .config
           echo "CONFIG_TARGET_mediatek_mt798x_DEVICE_jdcloud_re-cp-03=y" >> .config
 
-          # 3. Process config and re-enforce the RE-CP-03 target
+          # 3. Process config and re-enforce the target
           make defconfig
           echo "CONFIG_TARGET_DEVICE_mediatek_mt798x_DEVICE_jdcloud_re-cp-03=y" >> .config
           echo "CONFIG_TARGET_mediatek_mt798x_DEVICE_jdcloud_re-cp-03=y" >> .config
