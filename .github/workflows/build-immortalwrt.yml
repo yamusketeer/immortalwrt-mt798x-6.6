@@ -55,16 +55,22 @@ jobs:
             echo "CONFIG_TARGET_mediatek_mt7986=y" >> .config
           fi
 
-          # 2. Disable ALL_PROFILES and target JDCloud RE-CP-03
+          # 2. Disable ALL_PROFILES and set MT7986 target
           sed -i 's/CONFIG_TARGET_ALL_PROFILES=y/# CONFIG_TARGET_ALL_PROFILES is not set/' .config
           echo "CONFIG_TARGET_MULTI_PROFILE=y" >> .config
+
+          # 3. Enable both JDCloud profile variants to guarantee match
           echo "CONFIG_TARGET_DEVICE_mediatek_mt7986_DEVICE_jdcloud_re-cp-03=y" >> .config
           echo "CONFIG_TARGET_mediatek_mt7986_DEVICE_jdcloud_re-cp-03=y" >> .config
+          echo "CONFIG_TARGET_DEVICE_mediatek_mt7986_DEVICE_jdcloud_ax6000-baili=y" >> .config
+          echo "CONFIG_TARGET_mediatek_mt7986_DEVICE_jdcloud_ax6000-baili=y" >> .config
 
-          # 3. Resolve target definitions and re-enforce RE-CP-03
+          # 4. Resolve target definitions and re-enforce RE-CP-03 / Baili
           make defconfig
           echo "CONFIG_TARGET_DEVICE_mediatek_mt7986_DEVICE_jdcloud_re-cp-03=y" >> .config
           echo "CONFIG_TARGET_mediatek_mt7986_DEVICE_jdcloud_re-cp-03=y" >> .config
+          echo "CONFIG_TARGET_DEVICE_mediatek_mt7986_DEVICE_jdcloud_ax6000-baili=y" >> .config
+          echo "CONFIG_TARGET_mediatek_mt7986_DEVICE_jdcloud_ax6000-baili=y" >> .config
           make defconfig
           
       - name: Setup SSH interactive config terminal (Optional)
