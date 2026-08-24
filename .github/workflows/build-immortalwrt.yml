@@ -84,10 +84,13 @@ jobs:
           echo "Building on $(nproc) cores..."
           make -j$(nproc) || make -j1 V=s
 
-      - name: Verify JDCloud firmware build
+      - name: Verify and organize firmware files
         run: |
           echo "=== List of compiled firmware files ==="
-          ls -la bin/targets/mediatek/mt7986/          
+          ls -la bin/targets/mediatek/mt798x/
+          cd bin/targets/mediatek/mt798x/
+          rm -rf packages
+          echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
 
       - name: Organize output firmware files
         run: |
