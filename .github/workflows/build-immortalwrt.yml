@@ -90,15 +90,8 @@ jobs:
           
           # Prepare output directory for artifact upload
           mkdir -p /tmp/firmware
-#          cp -f ${TARGET_DIR}/*jdcloud* /tmp/firmware/ || cp -f ${TARGET_DIR}/*.bin /tmp/firmware/
           cp -f ${TARGET_DIR}/*.bin /tmp/firmware/ 2>/dev/null || cp -f ${TARGET_DIR}/* /tmp/firmware/
           echo "FIRMWARE_PATH=/tmp/firmware" >> $GITHUB_ENV
-
-#      - name: Organize output firmware files
-#        run: |
-#          cd bin/targets/*/*
-#          rm -rf packages
-#          echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
