@@ -43,32 +43,36 @@ jobs:
       - name: Update and install feeds
         run: |
           ./scripts/feeds update -a
-          # Remove broken package causing dependency warning
+          # Remove ttyd and broken packages causing dependency warning
           rm -rf feeds/luci/applications/luci-app-radicale3
+          rm -rf feeds/luci/applications/luci-app-ttyd
+          rm -rf feeds/packages/utils/ttyd          
           ./scripts/feeds install -a
 
       - name: Generate default target config (.config)
         run: |
-          if [ -f "defconfig/mt7986-ax6000.config" ]; then
-            cp -f defconfig/mt7986-ax6000.config .config
-          else
-            echo "CONFIG_TARGET_mediatek=y" > .config
-            echo "CONFIG_TARGET_mediatek_filogic=y" >> .config
-          fi
+          #if [ -f "defconfig/mt7986-ax6000.config" ]; then
+            #cp -f defconfig/mt7986-ax6000.config .config
+          #else
+          echo "CONFIG_TARGET_mediatek=y" > .config
+          echo "CONFIG_TARGET_mediatek_filogic=y" >> .config
+          #fi
 
           # sed -i 's/CONFIG_TARGET_ALL_PROFILES=y/# CONFIG_TARGET_ALL_PROFILES is not set/' .config
           echo "CONFIG_TARGET_ALL_PROFILES=y" >> .config
           
           echo "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
-          echo "CONFIG_TARGET_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
+          # echo "CONFIG_TARGET_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
+          make defconfig
 
           # 2. Exclude ttyd and its LuCI application wrapper
-          echo "CONFIG_PACKAGE_luci-app-ttyd=n" >> .config
-          echo "CONFIG_PACKAGE_ttyd=n" >> .config
+          # echo "CONFIG_PACKAGE_luci-app-ttyd=n" >> .config
+          # echo "CONFIG_PACKAGE_ttyd=n" >> .config
+          sed -i '/CONFIG_PACKAGE_luci-app-ttyd=y/d' .config
+          sed -i '/CONFIG_PACKAGE_ttyd=y/d' .config
+          echo "# CONFIG_PACKAGE_luci-app-ttyd is not set" >> .config
+          echo "# CONFIG_PACKAGE_ttyd is not set" >> .config          
           
-          make defconfig
-          echo "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
-          echo "CONFIG_TARGET_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
           make defconfig
           
       - name: Setup SSH interactive config terminal (Optional)
