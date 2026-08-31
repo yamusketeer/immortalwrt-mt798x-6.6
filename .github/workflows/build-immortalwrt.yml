@@ -62,6 +62,10 @@ jobs:
           echo "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
           echo "CONFIG_TARGET_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
 
+          # 2. Exclude ttyd and its LuCI application wrapper
+          echo "CONFIG_PACKAGE_luci-app-ttyd=n" >> .config
+          echo "CONFIG_PACKAGE_ttyd=n" >> .config
+          
           make defconfig
           echo "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
           echo "CONFIG_TARGET_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
