@@ -59,20 +59,22 @@ jobs:
             echo "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
           fi
 
-          # sed -i 's/CONFIG_TARGET_ALL_PROFILES=y/# CONFIG_TARGET_ALL_PROFILES is not set/' .config
-          # echo "CONFIG_TARGET_ALL_PROFILES=y" >> .config
-          
-          # echo "CONFIG_TARGET_mediatek_filogic_DEVICE_jdcloud_re-cp-03=y" >> .config
+          # 2. Expand base configuration dependencies
           make defconfig
 
-          # 2. Exclude ttyd and its LuCI application wrapper
-          # echo "CONFIG_PACKAGE_luci-app-ttyd=n" >> .config
-          # echo "CONFIG_PACKAGE_ttyd=n" >> .config
+          # 3. Strip all zh-cn language packs and ttyd configurations from .config
+          sed -i '/CONFIG_PACKAGE_luci-i18n-.*-zh-cn=y/d' .config
           sed -i '/CONFIG_PACKAGE_luci-app-ttyd=y/d' .config
           sed -i '/CONFIG_PACKAGE_ttyd=y/d' .config
+          sed -i '/CONFIG_PACKAGE_luci-app-turboacc-mtk_INCLUDE_TTYD=y/d' .config
+          
+          # 4. Disable standard OpenWrt/LuCI language options
+          echo "# CONFIG_LUCI_LANG_zh_Hans is not set" >> .config
+          echo "# CONFIG_PACKAGE_luci-i18n-base-zh-cn is not set" >> .config          
           echo "# CONFIG_PACKAGE_luci-app-ttyd is not set" >> .config
           echo "# CONFIG_PACKAGE_ttyd is not set" >> .config          
-          
+
+          # 5. Final dependency resolution pass
           make defconfig
           
       - name: Setup SSH interactive config terminal (Optional)
