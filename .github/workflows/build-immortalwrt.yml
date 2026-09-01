@@ -42,7 +42,13 @@ jobs:
 
       - name: Update and install feeds
         run: |
-          ./scripts/feeds update -a          
+          ./scripts/feeds update -a    
+
+          # 1. Patch TurboACC Makefile so it accepts dnsmasq-full instead of forcing standard dnsmasq
+          if [ -f "package/mtk/applications/luci-app-turboacc-mtk/Makefile" ]; then
+            sed -i 's/+dnsmasq/+dnsmasq-full/g' package/mtk/applications/luci-app-turboacc-mtk/Makefile
+          fi
+          
           # 1. Strip ttyd dependencies across ALL TurboACC Makefiles and Config.in files in the entire repo
           find package/ feeds/ -type f \( -name "Makefile" -o -name "Config.in" \) -exec sed -i \
             -e 's/+luci-app-ttyd//g' \
@@ -57,6 +63,7 @@ jobs:
 
       - name: Generate default target config (.config)
         run: |
+          # 1. Base Configuration Setup        
           if [ -f "defconfig/mt7986-ax6000.config" ]; then
             cp -f defconfig/mt7986-ax6000.config .config
           else
@@ -67,17 +74,26 @@ jobs:
 
           # 2. Expand base configuration dependencies
           make defconfig
+
           # 3. Strip all zh-cn language packages and ttyd lines completely from .config
           sed -i '/-zh-cn/d' .config
           sed -i '/ttyd/d' .config
           
           # 4. Disable LuCI Chinese language support and ttyd explicitly
+          echo "# CONFIG_PACKAGE_dnsmasq is not set" >> .config          
           echo "# CONFIG_LUCI_LANG_zh_Hans is not set" >> .config
           echo "# CONFIG_PACKAGE_luci-app-ttyd is not set" >> .config
           echo "# CONFIG_PACKAGE_ttyd is not set" >> .config
           echo "# CONFIG_PACKAGE_luci-app-turboacc-mtk_INCLUDE_TTYD is not set" >> .config
 
-          # 5. Final dependency resolution pass
+          # 5. Enable dnsmasq-full and WireGuard packages
+          echo "CONFIG_PACKAGE_dnsmasq-full=y" >> .config
+          echo "CONFIG_PACKAGE_kmod-wireguard=y" >> .config
+          echo "CONFIG_PACKAGE_wireguard-tools=y" >> .config
+          echo "CONFIG_PACKAGE_luci-proto-wireguard=y" >> .config
+          echo "CONFIG_PACKAGE_luci-app-wireguard=y" >> .config
+          
+          # 6. Final dependency resolution pass
           make defconfig
           
       - name: Setup SSH interactive config terminal (Optional)
