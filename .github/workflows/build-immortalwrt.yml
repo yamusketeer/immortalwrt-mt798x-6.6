@@ -42,8 +42,14 @@ jobs:
 
       - name: Update and install feeds
         run: |
-          ./scripts/feeds update -a
-          # Remove ttyd and broken packages causing dependency warning
+          ./scripts/feeds update -a          
+          # 1. Strip ttyd dependencies across ALL TurboACC Makefiles and Config.in files in the entire repo
+          find package/ feeds/ -type f \( -name "Makefile" -o -name "Config.in" \) -exec sed -i \
+            -e 's/+luci-app-ttyd//g' \
+            -e 's/+ttyd//g' \
+            -e '/luci-app-ttyd/d' \
+            -e '/package-ttyd/d' {} +            
+          # 2. Remove ttyd and broken packages causing dependency warning
           rm -rf feeds/luci/applications/luci-app-radicale3
           rm -rf feeds/luci/applications/luci-app-ttyd
           rm -rf feeds/packages/utils/ttyd          
@@ -61,18 +67,15 @@ jobs:
 
           # 2. Expand base configuration dependencies
           make defconfig
-
-          # 3. Strip all zh-cn language packs and ttyd configurations from .config
-          sed -i '/CONFIG_PACKAGE_luci-i18n-.*-zh-cn=y/d' .config
-          sed -i '/CONFIG_PACKAGE_luci-app-ttyd=y/d' .config
-          sed -i '/CONFIG_PACKAGE_ttyd=y/d' .config
-          sed -i '/CONFIG_PACKAGE_luci-app-turboacc-mtk_INCLUDE_TTYD=y/d' .config
+          # 3. Strip all zh-cn language packages and ttyd lines completely from .config
+          sed -i '/-zh-cn/d' .config
+          sed -i '/ttyd/d' .config
           
-          # 4. Disable standard OpenWrt/LuCI language options
+          # 4. Disable LuCI Chinese language support and ttyd explicitly
           echo "# CONFIG_LUCI_LANG_zh_Hans is not set" >> .config
-          echo "# CONFIG_PACKAGE_luci-i18n-base-zh-cn is not set" >> .config          
           echo "# CONFIG_PACKAGE_luci-app-ttyd is not set" >> .config
-          echo "# CONFIG_PACKAGE_ttyd is not set" >> .config          
+          echo "# CONFIG_PACKAGE_ttyd is not set" >> .config
+          echo "# CONFIG_PACKAGE_luci-app-turboacc-mtk_INCLUDE_TTYD is not set" >> .config
 
           # 5. Final dependency resolution pass
           make defconfig
