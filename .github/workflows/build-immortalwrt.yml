@@ -97,7 +97,8 @@ jobs:
           CONFIG_PACKAGE_dnsmasq_full_dhcpv6=y
           CONFIG_PACKAGE_dnsmasq_full_dnssec=y
           CONFIG_PACKAGE_dnsmasq_full_auth=y
-          CONFIG_PACKAGE_dnsmasq_full_ipset=y
+          CONFIG_PACKAGE_dnsmasq_full_ipset=n
+          # CONFIG_PACKAGE_dnsmasq_full_ipset is not set
           CONFIG_PACKAGE_dnsmasq_full_nftset=y
           CONFIG_PACKAGE_dnsmasq_full_conntrack=y
 
