@@ -79,21 +79,40 @@ jobs:
           sed -i '/-zh-cn/d' .config
           sed -i '/ttyd/d' .config
           
-          # 4. Disable LuCI Chinese language support and ttyd explicitly
-          echo "# CONFIG_PACKAGE_dnsmasq is not set" >> .config          
-          echo "# CONFIG_LUCI_LANG_zh_Hans is not set" >> .config
-          echo "# CONFIG_PACKAGE_luci-app-ttyd is not set" >> .config
-          echo "# CONFIG_PACKAGE_ttyd is not set" >> .config
-          echo "# CONFIG_PACKAGE_luci-app-turboacc-mtk_INCLUDE_TTYD is not set" >> .config
+          # 4. Force-replace standard dnsmasq with dnsmasq-full and set WireGuard
+          cat <<EOF >> .config
+          # DISABLE standard dnsmasq and unwanted apps
+          CONFIG_PACKAGE_dnsmasq=n
+          # CONFIG_PACKAGE_dnsmasq is not set
+          CONFIG_PACKAGE_ttyd=n
+          # CONFIG_PACKAGE_ttyd is not set
+          CONFIG_PACKAGE_luci-app-ttyd=n
+          # CONFIG_PACKAGE_luci-app-ttyd is not set
+          # CONFIG_LUCI_LANG_zh_Hans is not set
+          # CONFIG_PACKAGE_luci-app-turboacc-mtk_INCLUDE_TTYD is not set
 
-          # 5. Enable dnsmasq-full and WireGuard packages
-          echo "CONFIG_PACKAGE_dnsmasq-full=y" >> .config
-          echo "CONFIG_PACKAGE_kmod-wireguard=y" >> .config
-          echo "CONFIG_PACKAGE_wireguard-tools=y" >> .config
-          echo "CONFIG_PACKAGE_luci-proto-wireguard=y" >> .config
-          echo "CONFIG_PACKAGE_luci-app-wireguard=y" >> .config
-          
-          # 6. Final dependency resolution pass
+          # ENABLE dnsmasq-full and dependencies
+          CONFIG_PACKAGE_dnsmasq-full=y
+          CONFIG_PACKAGE_dnsmasq_full_dhcp=y
+          CONFIG_PACKAGE_dnsmasq_full_dhcpv6=y
+          CONFIG_PACKAGE_dnsmasq_full_dnssec=y
+          CONFIG_PACKAGE_dnsmasq_full_auth=y
+          CONFIG_PACKAGE_dnsmasq_full_ipset=y
+          CONFIG_PACKAGE_dnsmasq_full_nftset=y
+          CONFIG_PACKAGE_dnsmasq_full_conntrack=y
+
+          # ENABLE WireGuard
+          CONFIG_PACKAGE_kmod-wireguard=y
+          CONFIG_PACKAGE_wireguard-tools=y
+          CONFIG_PACKAGE_luci-proto-wireguard=y
+          CONFIG_PACKAGE_luci-app-wireguard=y
+          EOF
+
+          # 5. Resolve dependencies (make defconfig will honor the explicit dnsmasq-full selection)
+          make defconfig
+
+          # 6. Final safety sweep to ensure standard dnsmasq wasn't re-inserted
+          sed -i 's/CONFIG_PACKAGE_dnsmasq=y/# CONFIG_PACKAGE_dnsmasq is not set/' .config
           make defconfig
           
       - name: Setup SSH interactive config terminal (Optional)
